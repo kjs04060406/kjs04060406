@@ -66,15 +66,12 @@ function color(day) {
   return palette[level];
 }
 const assetDir = join(repo, 'assets');
-const csv = join(repo, 'data', 'codex-daily.csv');
 mkdirSync(assetDir, { recursive: true });
-mkdirSync(dirname(csv), { recursive: true });
 for (const [name, fill] of [['unknown', '#202020'], ...palette.map((value, index) => [String(index), value])]) {
   writeFileSync(join(assetDir, `codex-level-${name}.svg`), `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><rect width="9" height="9" rx="2" fill="${fill}"/></svg>\n`);
 }
-writeFileSync(csv, `date,tokens\n${sorted.map(([date, tokens]) => `${date},${tokens}`).join('\n')}\n`);
 
-const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const rows = weekdays.map((label, weekday) => {
   const cells = days.filter(day => day.weekday === weekday).map(day => {
     const level = day.known ? String(palette.indexOf(color(day))) : 'unknown';
@@ -89,7 +86,6 @@ const readme = readFileSync(readmePath, 'utf8');
 const begin = '<!-- CODEX_ACTIVITY_START -->';
 const finish = '<!-- CODEX_ACTIVITY_END -->';
 if (!readme.includes(begin) || !readme.includes(finish)) throw new Error('README 갱신 표식을 찾지 못했습니다.');
-const latest = sorted.slice(-14).reverse();
-const section = `${begin}\n최근 1년 · 각 칸에 커서를 올리면 날짜와 토큰 수가 표시됩니다.\n\n${rows.join('\n')}\n\n로컬 세션 기록 기준: **${first}–${today}** · **${formatter.format(total)} tokens** · **${activeDays}일 활동**  \n[날짜별 전체 수치](data/codex-daily.csv)\n\n| 날짜 (KST) | 토큰 |\n| --- | ---: |\n${latest.map(([date, tokens]) => `| ${date} | ${formatter.format(tokens)} |`).join('\n')}\n${finish}`;
+const section = `${begin}\n${rows.join('\n')}\n${finish}`;
 writeFileSync(readmePath, readme.replace(new RegExp(`${begin}[\\s\\S]*?${finish}`), section));
 console.log(JSON.stringify({ first, today, activeDays, total, files: filesUnder(sessions).length }));
