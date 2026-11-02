@@ -65,32 +65,24 @@ function color(day) {
   const level = Math.min(4, Math.max(1, Math.ceil(4 * Math.log1p(day.tokens) / Math.log1p(max))));
   return palette[level];
 }
-const cell = 12, gap = 3, left = 43, top = 77;
-const weeks = Math.ceil(days.length / 7);
-const width = left + weeks * (cell + gap) + 20;
-const monthLabels = days.flatMap((day, index) => {
-  if (day.date.slice(8) !== '01') return [];
-  return [`<text x="${left + Math.floor(index / 7) * (cell + gap)}" y="${top - 12}" fill="#aaa" font-size="11">${Number(day.date.slice(5, 7))}월</text>`];
-});
-const cells = days.map((day, index) => {
-  const x = left + Math.floor(index / 7) * (cell + gap);
-  const y = top + day.weekday * (cell + gap);
-  const title = day.known ? `${day.date}: ${formatter.format(day.tokens)} tokens` : `${day.date}: 로컬 기록 없음`;
-  return `<rect x="${x}" y="${y}" width="${cell}" height="${cell}" rx="3" fill="${color(day)}"><title>${title}</title></rect>`;
-});
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="218" viewBox="0 0 ${width} 218" role="img" aria-label="Codex 토큰 활동, 로컬 기록 ${first}부터 ${today}까지">
-<rect width="100%" height="100%" rx="12" fill="#151515"/>
-<text x="20" y="30" fill="#f5f5f5" font-family="Arial,sans-serif" font-size="18" font-weight="bold">Codex 토큰 활동</text>
-<text x="20" y="49" fill="#aaa" font-family="Arial,sans-serif" font-size="12">로컬 기록 ${first}부터 · ${formatter.format(total)} tokens · 활동 ${activeDays}일</text>
-<g font-family="Arial,sans-serif">${monthLabels.join('')}<text x="20" y="${top + 27}" fill="#888" font-size="10">월</text><text x="20" y="${top + 57}" fill="#888" font-size="10">수</text><text x="20" y="${top + 87}" fill="#888" font-size="10">금</text>${cells.join('')}</g>
-<text x="20" y="203" fill="#888" font-family="Arial,sans-serif" font-size="11">서울 시간 기준 · 회색(진함): 로컬 기록 없음 · 수치는 계정 전체 통계와 다를 수 있습니다</text>
-</svg>\n`;
-const asset = join(repo, 'assets', 'codex-activity.svg');
+const assetDir = join(repo, 'assets');
 const csv = join(repo, 'data', 'codex-daily.csv');
-mkdirSync(dirname(asset), { recursive: true });
+mkdirSync(assetDir, { recursive: true });
 mkdirSync(dirname(csv), { recursive: true });
-writeFileSync(asset, svg);
+for (const [name, fill] of [['unknown', '#202020'], ...palette.map((value, index) => [String(index), value])]) {
+  writeFileSync(join(assetDir, `codex-level-${name}.svg`), `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><rect width="9" height="9" rx="2" fill="${fill}"/></svg>\n`);
+}
 writeFileSync(csv, `date,tokens\n${sorted.map(([date, tokens]) => `${date},${tokens}`).join('\n')}\n`);
+
+const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+const rows = weekdays.map((label, weekday) => {
+  const cells = days.filter(day => day.weekday === weekday).map(day => {
+    const level = day.known ? String(palette.indexOf(color(day))) : 'unknown';
+    const tooltip = day.known ? `${day.date}: ${formatter.format(day.tokens)} tokens` : `${day.date}: 로컬 기록 없음`;
+    return `<img src="assets/codex-level-${level}.svg" width="12" height="12" alt="" title="${tooltip}">`;
+  }).join('');
+  return `<div>${label} ${cells}</div>`;
+});
 
 const readmePath = join(repo, 'README.md');
 const readme = readFileSync(readmePath, 'utf8');
@@ -98,6 +90,6 @@ const begin = '<!-- CODEX_ACTIVITY_START -->';
 const finish = '<!-- CODEX_ACTIVITY_END -->';
 if (!readme.includes(begin) || !readme.includes(finish)) throw new Error('README 갱신 표식을 찾지 못했습니다.');
 const latest = sorted.slice(-14).reverse();
-const section = `${begin}\n![Codex 토큰 활동](assets/codex-activity.svg)\n\n로컬 세션 기록 기준: **${first}–${today}** · **${formatter.format(total)} tokens** · **${activeDays}일 활동**  \n[날짜별 전체 수치](data/codex-daily.csv)\n\n| 날짜 (KST) | 토큰 |\n| --- | ---: |\n${latest.map(([date, tokens]) => `| ${date} | ${formatter.format(tokens)} |`).join('\n')}\n${finish}`;
+const section = `${begin}\n최근 1년 · 각 칸에 커서를 올리면 날짜와 토큰 수가 표시됩니다.\n\n${rows.join('\n')}\n\n로컬 세션 기록 기준: **${first}–${today}** · **${formatter.format(total)} tokens** · **${activeDays}일 활동**  \n[날짜별 전체 수치](data/codex-daily.csv)\n\n| 날짜 (KST) | 토큰 |\n| --- | ---: |\n${latest.map(([date, tokens]) => `| ${date} | ${formatter.format(tokens)} |`).join('\n')}\n${finish}`;
 writeFileSync(readmePath, readme.replace(new RegExp(`${begin}[\\s\\S]*?${finish}`), section));
 console.log(JSON.stringify({ first, today, activeDays, total, files: filesUnder(sessions).length }));
