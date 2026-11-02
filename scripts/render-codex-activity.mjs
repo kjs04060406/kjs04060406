@@ -130,6 +130,6 @@ const readme = readFileSync(readmePath, 'utf8');
 const begin = '<!-- CODEX_ACTIVITY_START -->';
 const finish = '<!-- CODEX_ACTIVITY_END -->';
 if (!readme.includes(begin) || !readme.includes(finish)) throw new Error('README 갱신 표식을 찾지 못했습니다.');
-const section = `${begin}\n<table><tr><td valign="top"><h3>Codex</h3>\n${graph('codex', daily, first)}</td><td valign="top"><h3>Claude</h3>\n${graph('claude', claudeDaily, firstClaude)}</td></tr></table>\n${finish}`;
+const section = `${begin}\n<table align="center"><tr><td valign="top"><h3>Codex</h3>\n${graph('codex', daily, first)}</td><td valign="top"><h3>Claude</h3>\n${graph('claude', claudeDaily, firstClaude)}</td></tr></table>\n${finish}`;
 writeFileSync(readmePath, readme.replace(new RegExp(`${begin}[\\s\\S]*?${finish}`), section));
 console.log(JSON.stringify({ first, today, activeDays, total, files: filesUnder(sessions).length, claudeFirst: firstClaude, claudeMessages: claudeMessages.size }));
