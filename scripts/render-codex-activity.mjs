@@ -72,13 +72,16 @@ for (const [name, fill] of [['unknown', '#202020'], ...palette.map((value, index
 }
 
 const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+for (const label of weekdays) {
+  writeFileSync(join(assetDir, `codex-weekday-${label}.svg`), `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="12" viewBox="0 0 30 12"><text x="0" y="10" fill="#f0f6fc" font-family="'Mona Sans VF',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="12">${label}</text></svg>\n`);
+}
 const rows = weekdays.map((label, weekday) => {
   const cells = days.filter(day => day.weekday === weekday).map(day => {
     const level = day.known ? String(palette.indexOf(color(day))) : 'unknown';
     const tooltip = day.known ? `${day.date}: ${formatter.format(day.tokens)} tokens` : `${day.date}: 로컬 기록 없음`;
     return `<img src="assets/codex-level-${level}.svg" width="12" height="12" alt="" title="${tooltip}">`;
   }).join('');
-  return `<div>${label} ${cells}</div>`;
+  return `<div><img src="assets/codex-weekday-${label}.svg" width="30" height="12" alt="${label}">${cells}</div>`;
 });
 
 const readmePath = join(repo, 'README.md');
