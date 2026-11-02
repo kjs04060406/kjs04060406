@@ -1,4 +1,6 @@
 $ErrorActionPreference = 'Stop'
+$env:GIT_TERMINAL_PROMPT = '0'
+$env:GCM_INTERACTIVE = 'never'
 $repo = Split-Path -Parent $PSScriptRoot
 $git = (Get-Command git -ErrorAction Stop).Source
 $node = (Get-Command node -ErrorAction Stop).Source
