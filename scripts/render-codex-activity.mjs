@@ -48,8 +48,7 @@ const activeDays = sorted.length;
 const formatter = new Intl.NumberFormat('ko-KR');
 const end = new Date(`${today}T12:00:00Z`);
 const start = new Date(end);
-start.setUTCDate(start.getUTCDate() - 364);
-start.setUTCDate(start.getUTCDate() - start.getUTCDay());
+start.setUTCDate(start.getUTCDate() - start.getUTCDay() - 26 * 7);
 const days = [];
 for (let date = new Date(start); date <= end; date.setUTCDate(date.getUTCDate() + 1)) {
   const key = date.toISOString().slice(0, 10);
@@ -75,6 +74,20 @@ const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 for (const label of weekdays) {
   writeFileSync(join(assetDir, `codex-weekday-${label}.svg`), `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="12" viewBox="0 0 30 12"><text x="0" y="10" fill="#f0f6fc" font-family="'Mona Sans VF',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="12">${label}</text></svg>\n`);
 }
+const columns = Math.ceil(days.length / 7);
+const monthWidth = 30 + columns * 12;
+const monthLabels = [];
+const monthNames = [];
+const monthFormat = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
+const startMidnight = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+for (let month = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1)); month <= end; month.setUTCMonth(month.getUTCMonth() + 1)) {
+  const column = Math.max(0, Math.floor((month - startMidnight) / (7 * 24 * 60 * 60 * 1000)));
+  const x = Math.min(30 + column * 12, monthWidth - 25);
+  const name = monthFormat.format(month);
+  monthNames.push(name);
+  monthLabels.push(`<text x="${x}" y="12">${name}</text>`);
+}
+writeFileSync(join(assetDir, 'codex-months.svg'), `<svg xmlns="http://www.w3.org/2000/svg" width="${monthWidth}" height="18" viewBox="0 0 ${monthWidth} 18"><g fill="#f0f6fc" font-family="'Mona Sans VF',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="12">${monthLabels.join('')}</g></svg>\n`);
 const rows = weekdays.map((label, weekday) => {
   const cells = days.filter(day => day.weekday === weekday).map(day => {
     const level = day.known ? String(palette.indexOf(color(day))) : 'unknown';
@@ -89,6 +102,6 @@ const readme = readFileSync(readmePath, 'utf8');
 const begin = '<!-- CODEX_ACTIVITY_START -->';
 const finish = '<!-- CODEX_ACTIVITY_END -->';
 if (!readme.includes(begin) || !readme.includes(finish)) throw new Error('README 갱신 표식을 찾지 못했습니다.');
-const section = `${begin}\n${rows.join('\n')}\n${finish}`;
+const section = `${begin}\n<div><img src="assets/codex-months.svg" width="${monthWidth}" height="18" alt="${monthNames.join(' ')}"></div>\n${rows.join('\n')}\n${finish}`;
 writeFileSync(readmePath, readme.replace(new RegExp(`${begin}[\\s\\S]*?${finish}`), section));
 console.log(JSON.stringify({ first, today, activeDays, total, files: filesUnder(sessions).length }));
