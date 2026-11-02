@@ -1,16 +1,23 @@
-## Hi there 👋
+# JongSeop Kim
 
-<!--
-**kjs04060406/kjs04060406** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+## Codex 사용 기록
 
-Here are some ideas to get you started:
+아래 그래프와 날짜별 수치는 이 컴퓨터에 남아 있는 세션 기록으로 자동 갱신합니다.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+<!-- CODEX_ACTIVITY_START -->
+![Codex 토큰 활동](assets/codex-activity.svg)
+
+로컬 세션 기록 기준: **2026-10-26–2026-11-02** · **123,349,784 tokens** · **6일 활동**  
+[날짜별 전체 수치](data/codex-daily.csv)
+
+| 날짜 (KST) | 토큰 |
+| --- | ---: |
+| 2026-11-02 | 11,170,491 |
+| 2026-11-01 | 41,755,453 |
+| 2026-10-31 | 20,108,870 |
+| 2026-10-28 | 12,284,414 |
+| 2026-10-27 | 3,665,390 |
+| 2026-10-26 | 34,365,166 |
+<!-- CODEX_ACTIVITY_END -->
+
+이 그래프는 이 컴퓨터에 저장된 Codex 세션의 토큰 기록을 날짜별로 집계합니다. 계정 프로필에 표시되는 전체 기간·사용량과는 다를 수 있습니다. 대화 내용은 공개하지 않습니다.
